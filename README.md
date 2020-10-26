@@ -9,6 +9,18 @@ Phenolopy can be applied to derive numerous phenometrics from satellite imagery,
 
 The codes presented on the figure above translate to:
 
-Attempt | #1 | #2 | #3 | #4 | #5 | #6 | #7 | #8 | #9 | #10 | #11
---- | --- | --- | --- |--- |--- |--- |--- |--- |--- |--- |---
-Seconds | 301 | 283 | 290 | 286 | 289 | 285 | 287 | 287 | 272 | 276 | 269
+Code | Description | Method
+--- | --- | ---
+POS | Peak of season | TBA
+MOS | Middle of season | TBA
+NOS | Number of seasons | TBA
+VOS | Valley of season | TBA
+BSE | Base | TBA
+SOS | Start of season | TBA
+EOS | End of season | TBA
+LOS | Length of season | TBA
+ROI | Rate of increase | TBA
+ROD | Rate of decrease | TBA
+AOS | Amplitude of season | TBA
+SIOS | Short integral of season | TBA
+LIOS | Long integral of season | TBA
