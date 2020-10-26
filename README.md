@@ -5,4 +5,4 @@ Phenolopy is heavily based on the concept and methodology behind the TIMESAT sof
 
 Phenolopy can be applied to derive numerous phenometrics from satellite imagery, as presented in Figure 1 below. These phenometrics can be derived for any type of land phenomena, including crop vegetation, native vegetation, and even moisture data. That said, the key target is vegetation.
 
-![alt text](https://github.com/lewistrotter/Phenolopy/blob/main/documentation/img/pheno_explain.png?raw=true)
+![alt text](https://github.com/lewistrotter/Phenolopy/blob/main/documentation/images/pheno_explain.png?raw=true)
