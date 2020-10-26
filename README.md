@@ -9,18 +9,18 @@ Phenolopy can be applied to derive numerous phenometrics from satellite imagery,
 
 The codes presented on the figure above translate to:
 
-Code | Description | Method
---- | --- | ---
-POS | Peak of season | TBA
-MOS | Middle of season | TBA
-NOS | Number of seasons | TBA
-VOS | Valley of season | TBA
-BSE | Base | TBA
-SOS | Start of season | TBA
-EOS | End of season | TBA
-LOS | Length of season | TBA
-ROI | Rate of increase | TBA
-ROD | Rate of decrease | TBA
-AOS | Amplitude of season | TBA
-SIOS | Short integral of season | TBA
-LIOS | Long integral of season | TBA
+Code | Metric | Description | Method | Values
+--- | --- | --- | --- | ---
+POS | Peak of season | TBA | TBA | TBA
+MOS | Middle of season | TBA | TBA | TBA
+NOS | Number of seasons | TBA | TBA | TBA
+VOS | Valley of season | TBA | TBA | TBA
+BSE | Base | TBA | TBA | TBA
+SOS | Start of season | TBA | TBA | TBA
+EOS | End of season | TBA | TBA | TBA
+LOS | Length of season | TBA | TBA | TBA
+ROI | Rate of increase | TBA | TBA | TBA
+ROD | Rate of decrease | TBA | TBA | TBA
+AOS | Amplitude of season | TBA | TBA | TBA
+SIOS | Short integral of season | TBA | TBA | TBA
+LIOS | Long integral of season | TBA | TBA | TBA
