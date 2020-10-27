@@ -31,6 +31,12 @@ LIOS | Long integral of season | TBA | TBA | TBA
 SIOT | Short integral of total | TBA | TBA | TBA
 LIOT | Long integral of total | TBA | TBA | TBA
 
+## Key Technologies
+- Python
+- Xarray and Numpy
+- OpenDataCube (ODC)
+- Scipy and Statsmodel
+
 ## Demonstration
 Todo.
 
