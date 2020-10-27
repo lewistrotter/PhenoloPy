@@ -11,9 +11,9 @@ The codes presented on the figure above translate to:
 
 Code | Metric | Description | Method | Values Represent
 --- | --- | --- | --- | ---
-POS | Peak of season | The maximum vegetation value in timeseries | Maximum value | Vegetation index value (e.g. NDVI)
+POS | Peak of season | The peak vegetation value in timeseries. | Maximum value | Vegetation (e.g. NDVI)
 MOS | Middle of season | TBA | TBA | TBA
-NOS | Number of seasons | TBA | TBA | TBA
+NOS | Number of seasons | Total number of prominent peaks (seasons) within timeseries. | TBA | TBA
 VOS | Valley of season | TBA | TBA | TBA
 BSE | Base | TBA | TBA | TBA
 SOS | Start of season | TBA | TBA | TBA
