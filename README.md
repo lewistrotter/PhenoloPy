@@ -9,9 +9,9 @@ Phenolopy can be applied to derive numerous phenometrics from satellite imagery,
 
 The codes presented on the figure above translate to:
 
-Code | Metric | Description | Method | Values
+Code | Metric | Description | Method | Values Represent
 --- | --- | --- | --- | ---
-POS | Peak of season | TBA | TBA | TBA
+POS | Peak of season | The maximum vegetation value in timeseries | Maximum value | Vegetation index value (e.g. NDVI)
 MOS | Middle of season | TBA | TBA | TBA
 NOS | Number of seasons | TBA | TBA | TBA
 VOS | Valley of season | TBA | TBA | TBA
@@ -24,3 +24,5 @@ ROD | Rate of decrease | TBA | TBA | TBA
 AOS | Amplitude of season | TBA | TBA | TBA
 SIOS | Short integral of season | TBA | TBA | TBA
 LIOS | Long integral of season | TBA | TBA | TBA
+SIOT | Short integral of total | TBA | TBA | TBA
+LIOT | Long integral of total | TBA | TBA | TBA
