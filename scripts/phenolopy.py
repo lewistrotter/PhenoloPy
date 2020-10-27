@@ -998,8 +998,12 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         slope_l_med = slope_l_pos.median('time')
         dists_from_median = slope_l_pos - slope_l_med 
         
+        # make mask for all nan pixels and fill with 0.0 (needs to be float)
+        mask = dists_from_median.isnull().all('time')
+        dists_from_median = xr.where(mask, 0.0, dists_from_median)
+        
         # get time index where min dist from median (first on slope)
-        i = dists_from_median.argmin('time')
+        i = dists_from_median.argmin('time', skipna=True)
         
         # get vege start of season values and times (day of year)
         da_sos_values = slope_l_pos.isel(time=i, drop=True)
@@ -1009,6 +1013,10 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         
         # get vege start of season times (day of year)
         da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)
+        
+        # set all vals and time nan slices from mask to nan
+        da_sos_values = da_sos_values.where(~mask, np.nan)
+        da_sos_times = da_sos_times.where(~mask, np.nan)
 
     elif method == 'median_of_slope':
         
@@ -1028,6 +1036,10 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         dists_from_median = slope_l_pos - slope_l_med
         dists_from_median = abs(dists_from_median)
         
+        # make mask for all nan pixels and fill with 0.0 (needs to be float)
+        mask = dists_from_median.isnull().all('time')
+        dists_from_median = xr.where(mask, 0.0, dists_from_median)
+        
         # get time index where min absolute dist from median (median on slope)
         i = dists_from_median.argmin('time')
         
@@ -1038,7 +1050,11 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         print('> Calculating start of season (sos) times via method: median_of_slope.')
         
         # get vege start of season times (day of year)
-        da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True) 
+        da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)
+        
+        # set all vals and time nan slices from mask to nan
+        da_sos_values = da_sos_values.where(~mask, np.nan)
+        da_sos_times = da_sos_times.where(~mask, np.nan)
         
     elif method == 'seasonal_amplitude':
         
@@ -1049,30 +1065,38 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         slope_l = da.where(da['time.dayofyear'] <= da_peak_times)
         slope_l_diffs = slope_l.differentiate('time')
         slope_l_pos_diffs = xr.where(slope_l_diffs > 0, True, False)
-        
+                
         # select vege values where positive on left slope
-        slope_l_pos = slope_l.where(slope_l_pos_diffs)       
-               
+        slope_l_pos = slope_l.where(slope_l_pos_diffs)
+                   
         # use just the left slope min val (one), or use the bse/vos calc earlier (two) for sos
         if thresh_sides == 'one_sided':
             da_sos_values = (da_aos_values * factor) + slope_l.min('time')
         elif thresh_sides == 'two_sided':
             da_sos_values = (da_aos_values * factor) + da_base_values
-            
+                        
         # calc distance of pos vege from calculated sos value
         dists_from_sos_values = abs(slope_l_pos - da_sos_values)
         
+        # make mask for all nan pixels and fill with 0.0 (needs to be float)
+        mask = dists_from_sos_values.isnull().all('time')
+        dists_from_sos_values = xr.where(mask, 0.0, dists_from_sos_values)
+            
         # get time index where min absolute dist from sos
-        i = dists_from_sos_values.argmin('time')
-                
+        i = dists_from_sos_values.argmin('time', skipna=True)
+                 
         # get vege start of season values and times (day of year)
         da_sos_values = slope_l_pos.isel(time=i, drop=True)
-        
+                
         # notify user
         print('> Calculating start of season (sos) times via method: seasonal_amplitude.')
         
         # get vege start of season times (day of year)
-        da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)  
+        da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)
+        
+        # set all vals and time nan slices from mask to nan
+        da_sos_values = da_sos_values.where(~mask, np.nan)
+        da_sos_times = da_sos_times.where(~mask, np.nan)
     
     elif method == 'absolute_value':
         
@@ -1090,6 +1114,10 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         # calc abs distance of positive slope from absolute value
         dists_from_abs_value = abs(slope_l_pos - abs_value)
         
+        # make mask for all nan pixels and fill with 0.0 (needs to be float)
+        mask = dists_from_abs_value.isnull().all('time')
+        dists_from_abs_value = xr.where(mask, 0.0, dists_from_abs_value)
+        
         # get time index where min absolute dist from sos (absolute value)
         i = dists_from_abs_value.argmin('time')
         
@@ -1101,6 +1129,10 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         
         # get vege start of season times (day of year)
         da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)
+        
+        # set all vals and time nan slices from mask to nan
+        da_sos_values = da_sos_values.where(~mask, np.nan)
+        da_sos_times = da_sos_times.where(~mask, np.nan)
         
     elif method == 'relative_value':
 
@@ -1126,6 +1158,10 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
            
         # calc abs distance of positive slope from sos values
         dists_from_sos_values = abs(slope_l_pos - da_sos_values)
+        
+        # make mask for all nan pixels and fill with 0.0 (needs to be float)
+        mask = dists_from_sos_values.isnull().all('time')
+        dists_from_sos_values = xr.where(mask, 0.0, dists_from_sos_values)
 
         # get time index where min absolute dist from sos
         i = dists_from_sos_values.argmin('time')
@@ -1137,7 +1173,11 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         print('> Calculating start of season (sos) times via method: relative_value.')
         
         # get vege start of season times (day of year)
-        da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)   
+        da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)
+        
+        # set all vals and time nan slices from mask to nan
+        da_sos_values = da_sos_values.where(~mask, np.nan)
+        da_sos_times = da_sos_times.where(~mask, np.nan)
         
     elif method == 'stl_trend':
         
@@ -1189,6 +1229,10 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         
         # calc abs distance of positive slope from stl values
         dists_from_stl_values = abs(slope_l_pos - stl_l)
+        
+        # make mask for all nan pixels and fill with 0.0 (needs to be float)
+        mask = dists_from_stl_values.isnull().all('time')
+        dists_from_stl_values = xr.where(mask, 0.0, dists_from_stl_values)
 
         # get time index where min absolute dist from sos
         i = dists_from_stl_values.argmin('time')
@@ -1200,8 +1244,12 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         print('> Calculating start of season (sos) times via method: stl_trend.')
         
         # get vege start of season times (day of year)
-        da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)        
+        da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)
         
+        # set all vals and time nan slices from mask to nan
+        da_sos_values = da_sos_values.where(~mask, np.nan)
+        da_sos_times = da_sos_times.where(~mask, np.nan)
+
     # convert type
     da_sos_values = da_sos_values.astype('float32')
     da_sos_times = da_sos_times.astype('int16')
@@ -1209,7 +1257,7 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
     # rename
     da_sos_values = da_sos_values.rename('sos_values')
     da_sos_times = da_sos_times.rename('sos_times')
-        
+            
     # notify user
     print('> Success!\n')
     
