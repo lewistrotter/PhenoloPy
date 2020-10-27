@@ -30,3 +30,9 @@ SIOS | Short integral of season | TBA | TBA | TBA
 LIOS | Long integral of season | TBA | TBA | TBA
 SIOT | Short integral of total | TBA | TBA | TBA
 LIOT | Long integral of total | TBA | TBA | TBA
+
+## Demonstration
+Todo.
+
+## Sources
+Todo.
