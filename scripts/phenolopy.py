@@ -698,6 +698,9 @@ def calc_num_seasons(ds):
     if len(ds['veg_index'].shape) == 1:
         raise Exception('> Remove outliers does not operate on 1D datasets. Ensure it has an x, y and time dimension.')
         
+    # get height (val at 80% threshold) and dist between peals (4 seasons)
+    #da_height = (ds['veg_index'].max('time') - ds['veg_index'].min('time')) * 0.80
+    #distance = math.ceil(len(ds['time']) / 4)
 
     # set up calc peaks functions
     def calc_peaks(vec_data):
@@ -708,10 +711,6 @@ def calc_num_seasons(ds):
 
         # calc num peaks
         peaks = find_peaks(vec_data, height=height, distance=distance)
-
-        # can find specific dates with this
-        #for p_dt in v['time'].isel(time=p):
-            #plt.axvline(vec_dates.dt.dayofyear, color='black', linestyle='--')
 
         if peaks:
             return len(peaks[0])
@@ -2264,3 +2263,7 @@ def load_test_dataset(data_path='./data/'):
     ds = ds.to_dataset(name='veg_index')
     
     return ds
+
+
+def load_tifs(path):
+    print('hey')
