@@ -2117,6 +2117,9 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
     # create template dataset to hold phenometrics
     #template = create_ds_template(da)
     
+    # take a mask of all-nan slices for clean up at end
+    da_all_nan_mask = da.isnull().all('time')
+    
     # notify user
     print('Beginning calculation of phenometrics. This can take awhile - please wait.\n')
     
@@ -2221,6 +2224,9 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
   
     # combine data arrays into one dataset
     ds_phenos = xr.merge(da_list)
+    
+    # set original all nan pixels back to nan
+    ds_phenos = ds_phenos.where(~da_all_nan_mask)
     
     # notify user
     print('Phenometrics calculated successfully!')
