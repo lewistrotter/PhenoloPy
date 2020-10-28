@@ -1707,6 +1707,9 @@ def get_los(da, da_sos_times, da_eos_times):
         
         # replace negative values with max time 
         da_los_values = xr.where(da_los_values >= 0, da_los_values, da_max_times + da_neg_values)
+        
+        # drop time dim if exists
+        da_los_values = da_los_values.drop({'time'}, errors='ignore')
 
     # convert type
     da_los_values = da_los_values.astype('int16')
@@ -2215,6 +2218,10 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
         da_liot_values,
         da_siot_values
     ]
+    
+    print(da_roi_values)
+    
+    
     
     # combine data arrays into one dataset
     ds_phenos = xr.merge(da_list)
