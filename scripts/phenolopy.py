@@ -833,7 +833,7 @@ def get_pos(da):
     
     # get pos times (day of year) at max val in each pixel timeseries)
     print('> Calculating peak of season (pos) times.')
-    i = da.argmax('time')
+    i = da.argmax('time', skipna=True)
     da_pos_times = da['time.dayofyear'].isel(time=i, drop=True)
     
     # convert type
@@ -881,7 +881,7 @@ def get_vos(da):
     
     # get vos times (day of year) at min val in each pixel timeseries)
     print('> Calculating valley of season (vos) times.')
-    i = da.argmin('time')
+    i = da.argmin('time', skipna=True)
     da_vos_times = da['time.dayofyear'].isel(time=i, drop=True)
     
     # convert type
@@ -1115,7 +1115,7 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         dists_from_median = xr.where(mask, 0.0, dists_from_median)
         
         # get time index where min absolute dist from median (median on slope)
-        i = dists_from_median.argmin('time')
+        i = dists_from_median.argmin('time', skipna=True)
         
         # get vege start of season values and times (day of year)
         da_sos_values = slope_l_pos.isel(time=i, drop=True)
@@ -1185,7 +1185,7 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         dists_from_abs_value = xr.where(mask, 0.0, dists_from_abs_value)
         
         # get time index where min absolute dist from sos (absolute value)
-        i = dists_from_abs_value.argmin('time')
+        i = dists_from_abs_value.argmin('time', skipna=True)
         
         # get vege start of season values and times (day of year)
         da_sos_values = slope_l_pos.isel(time=i, drop=True)
@@ -1226,7 +1226,7 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         dists_from_sos_values = xr.where(mask, 0.0, dists_from_sos_values)
 
         # get time index where min absolute dist from sos
-        i = dists_from_sos_values.argmin('time')
+        i = dists_from_sos_values.argmin('time', skipna=True)
                 
         # get vege start of season values and times (day of year)
         da_sos_values = slope_l_pos.isel(time=i, drop=True)
@@ -1294,7 +1294,7 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         dists_from_stl_values = xr.where(mask, 0.0, dists_from_stl_values)
 
         # get time index where min absolute dist from sos
-        i = dists_from_stl_values.argmin('time')
+        i = dists_from_stl_values.argmin('time', skipna=True)
                 
         # get vege start of season values and times (day of year)
         da_sos_values = slope_l_pos.isel(time=i, drop=True)
@@ -1418,7 +1418,7 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         dists_from_median = xr.where(mask, 0.0, dists_from_median)
         
         # get time index where min dist from median (first on slope)
-        i = dists_from_median.argmin('time')
+        i = dists_from_median.argmin('time', skipna=True)
         
         # get vege end of season values and times (day of year)
         da_eos_values = slope_r_neg.isel(time=i, drop=True)
@@ -1452,7 +1452,7 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         dists_from_median = xr.where(mask, 0.0, dists_from_median)
         
         # get time index where min absolute dist from median (median on slope)
-        i = dists_from_median.argmin('time')
+        i = dists_from_median.argmin('time', skipna=True)
         
         # get vege start of season values and times (day of year)
         da_eos_values = slope_r_neg.isel(time=i, drop=True)
@@ -1490,7 +1490,7 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         dists_from_eos_values = xr.where(mask, 0.0, dists_from_eos_values)
         
         # get time index where min absolute dist from eos
-        i = dists_from_eos_values.argmin('time')
+        i = dists_from_eos_values.argmin('time', skipna=True)
                 
         # get vege end of season values and times (day of year)
         da_eos_values = slope_r_neg.isel(time=i, drop=True)
@@ -1522,7 +1522,7 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         dists_from_abs_value = xr.where(mask, 0.0, dists_from_abs_value)
         
         # get time index where min absolute dist from eos (absolute value)
-        i = dists_from_abs_value.argmin('time')
+        i = dists_from_abs_value.argmin('time', skipna=True)
         
         # get vege end of season values and times (day of year)
         da_eos_values = slope_r_neg.isel(time=i, drop=True)
@@ -1563,7 +1563,7 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         dists_from_eos_values = xr.where(mask, 0.0, dists_from_eos_values)
 
         # get time index where min absolute dist from eos
-        i = dists_from_eos_values.argmin('time')
+        i = dists_from_eos_values.argmin('time', skipna=True)
                 
         # get vege end of season values and times (day of year)
         da_eos_values = slope_r_neg.isel(time=i, drop=True)
@@ -1631,7 +1631,7 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         dists_from_stl_values = xr.where(mask, 0.0, dists_from_stl_values)
 
         # get time index where min absolute dist from eos
-        i = dists_from_stl_values.argmin('time')
+        i = dists_from_stl_values.argmin('time', skipna=True)
                 
         # get vege end of season values and times (day of year)
         da_eos_values = slope_r_eos.isel(time=i, drop=True)
@@ -2218,11 +2218,7 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
         da_liot_values,
         da_siot_values
     ]
-    
-    print(da_roi_values)
-    
-    
-    
+  
     # combine data arrays into one dataset
     ds_phenos = xr.merge(da_list)
     
