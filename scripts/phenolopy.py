@@ -6,7 +6,7 @@ methodology is mostly based on the methodology underpinning TIMESAT 3.3. Some co
 been adapted from the great work of Chad from DEAfrica.
 
 The script contains the following primary functions:
-    1.
+    1. 
     2. calc_vege_index: calculate one of several vegetation indices;
     3. resample: resamples data to a defined time interval (e.g. bi-monthly);
     4. removal_outliers: detects and removes timeseries outliers;
@@ -660,6 +660,84 @@ def smooth(ds, method='savitsky', window_length=3, polyorder=1, sigma=1):
     return ds
 
 
+def calc_num_seasons(ds):
+    """
+    Takes an xarray Dataset containing vege values and calculates the number of
+    seasons for each timeseries pixel. The number of seasons provides a count of number 
+    of peaks in each pixel timeseries.
+
+    Parameters
+    ----------
+    ds: xarray Dataset
+        A two-dimensional or multi-dimensional array containing an Dataset of veg_index 
+        and time values. 
+
+    Returns
+    -------
+    da_num_seasons : xarray DataArray
+        An xarray DataArray type with an x and y dimension (no time). Each pixel is the 
+        number of seasons value detected across the timeseries at each pixel.
+    """
+    
+    # notify user
+    print('Beginning calculation of number of seasons.')
+    
+    # check if type is xr dataset
+    if type(ds) != xr.Dataset:
+        raise TypeError('> Not a dataset. Please provide a xarray dataset.')
+        
+    # check if time dimension is in dataset
+    if 'time' not in list(ds.dims):
+        raise ValueError('> Time dimension not in dataset. Please ensure dataset has a time dimension.')
+    
+    # check if dataset contains veg_index variable
+    if 'veg_index' not in list(ds.data_vars):
+        raise ValueError('> Vegetation index (veg_index) not in dataset. Please generate veg_index first.')
+                        
+    # check if dataset is 2D or above
+    if len(ds['veg_index'].shape) == 1:
+        raise Exception('> Remove outliers does not operate on 1D datasets. Ensure it has an x, y and time dimension.')
+        
+
+    # set up calc peaks functions
+    def calc_peaks(vec_data):
+    
+        # get height (val at 75% threshold) and dist between peals (4 seasons)
+        height = np.nanquantile(vec_data, q=0.75)
+        distance = math.ceil(len(vec_data) / 4)
+
+        # calc num peaks
+        peaks = find_peaks(vec_data, height=height, distance=distance)
+
+        # can find specific dates with this
+        #for p_dt in v['time'].isel(time=p):
+            #plt.axvline(vec_dates.dt.dayofyear, color='black', linestyle='--')
+
+        if peaks:
+            return len(peaks[0])
+        else:
+            return 0
+        
+    # calculate nos using calc_funcs func
+    print('> Calculating number of seasons.')
+    da_nos = xr.apply_ufunc(calc_peaks, ds['veg_index'], 
+                            input_core_dims=[['time']],
+                            vectorize=True, 
+                            dask='parallelized', 
+                            output_dtypes=[np.int16])
+    
+    # convert type
+    da_nos = da_nos.astype('int16')
+    
+    # rename
+    da_nos = da_nos.rename('num_seasons')
+    
+    # notify user
+    print('> Success!\n')
+        
+    return da_nos
+ 
+
 def create_ds_template(da):
     """
     Takes an xarray data array containing veg_index values and creates an empty
@@ -1013,10 +1091,6 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         
         # get vege start of season times (day of year)
         da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)
-        
-        # set all vals and time nan slices from mask to nan
-        da_sos_values = da_sos_values.where(~mask, np.nan)
-        da_sos_times = da_sos_times.where(~mask, np.nan)
 
     elif method == 'median_of_slope':
         
@@ -1051,10 +1125,6 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         
         # get vege start of season times (day of year)
         da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)
-        
-        # set all vals and time nan slices from mask to nan
-        da_sos_values = da_sos_values.where(~mask, np.nan)
-        da_sos_times = da_sos_times.where(~mask, np.nan)
         
     elif method == 'seasonal_amplitude':
         
@@ -1093,10 +1163,6 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         
         # get vege start of season times (day of year)
         da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)
-        
-        # set all vals and time nan slices from mask to nan
-        da_sos_values = da_sos_values.where(~mask, np.nan)
-        da_sos_times = da_sos_times.where(~mask, np.nan)
     
     elif method == 'absolute_value':
         
@@ -1129,10 +1195,6 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         
         # get vege start of season times (day of year)
         da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)
-        
-        # set all vals and time nan slices from mask to nan
-        da_sos_values = da_sos_values.where(~mask, np.nan)
-        da_sos_times = da_sos_times.where(~mask, np.nan)
         
     elif method == 'relative_value':
 
@@ -1168,16 +1230,13 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
                 
         # get vege start of season values and times (day of year)
         da_sos_values = slope_l_pos.isel(time=i, drop=True)
-        
+
         # notify user
         print('> Calculating start of season (sos) times via method: relative_value.')
+        print('> Warning: this can take a long time.')
         
         # get vege start of season times (day of year)
         da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)
-        
-        # set all vals and time nan slices from mask to nan
-        da_sos_values = da_sos_values.where(~mask, np.nan)
-        da_sos_times = da_sos_times.where(~mask, np.nan)
         
     elif method == 'stl_trend':
         
@@ -1245,11 +1304,16 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         
         # get vege start of season times (day of year)
         da_sos_times = slope_l_pos['time.dayofyear'].isel(time=i, drop=True)
+    
+    else:
+        raise ValueError('Provided method not supported. Aborting.')
         
-        # set all vals and time nan slices from mask to nan
-        da_sos_values = da_sos_values.where(~mask, np.nan)
-        da_sos_times = da_sos_times.where(~mask, np.nan)
-
+    # replace any all nan slices with first val and time in each pixel
+    #da_sos_values = da_sos_values.where(~mask, slope_l.isel(time=0))
+    #da_sos_times = da_sos_times.where(~mask, slope_l['time.dayofyear'].isel(time=0))
+    da_sos_values = da_sos_values.where(~mask, np.nan)
+    da_sos_times = da_sos_times.where(~mask, np.nan)
+    
     # convert type
     da_sos_values = da_sos_values.astype('float32')
     da_sos_times = da_sos_times.astype('int16')
@@ -1349,6 +1413,10 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         slope_r_med = slope_r_neg.median('time')
         dists_from_median = slope_r_neg - slope_r_med 
         
+        # make mask for all nan pixels and fill with 0.0 (needs to be float)
+        mask = dists_from_median.isnull().all('time')
+        dists_from_median = xr.where(mask, 0.0, dists_from_median)
+        
         # get time index where min dist from median (first on slope)
         i = dists_from_median.argmin('time')
         
@@ -1378,6 +1446,10 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         slope_r_med = slope_r_neg.median('time')
         dists_from_median = slope_r_neg - slope_r_med
         dists_from_median = abs(dists_from_median)
+        
+        # make mask for all nan pixels and fill with 0.0 (needs to be float)
+        mask = dists_from_median.isnull().all('time')
+        dists_from_median = xr.where(mask, 0.0, dists_from_median)
         
         # get time index where min absolute dist from median (median on slope)
         i = dists_from_median.argmin('time')
@@ -1413,6 +1485,10 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         # calc distance of neg vege from calculated eos value
         dists_from_eos_values = abs(slope_r_neg - da_eos_values)
         
+        # make mask for all nan pixels and fill with 0.0 (needs to be float)
+        mask = dists_from_eos_values.isnull().all('time')
+        dists_from_eos_values = xr.where(mask, 0.0, dists_from_eos_values)
+        
         # get time index where min absolute dist from eos
         i = dists_from_eos_values.argmin('time')
                 
@@ -1440,6 +1516,10 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         
         # calc abs distance of negative slope from absolute value
         dists_from_abs_value = abs(slope_r_neg - abs_value)
+        
+        # make mask for all nan pixels and fill with 0.0 (needs to be float)
+        mask = dists_from_abs_value.isnull().all('time')
+        dists_from_abs_value = xr.where(mask, 0.0, dists_from_abs_value)
         
         # get time index where min absolute dist from eos (absolute value)
         i = dists_from_abs_value.argmin('time')
@@ -1477,6 +1557,10 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
            
         # calc abs distance of negative slope from eos values
         dists_from_eos_values = abs(slope_r_neg - da_eos_values)
+        
+        # make mask for all nan pixels and fill with 0.0 (needs to be float)
+        mask = dists_from_eos_values.isnull().all('time')
+        dists_from_eos_values = xr.where(mask, 0.0, dists_from_eos_values)
 
         # get time index where min absolute dist from eos
         i = dists_from_eos_values.argmin('time')
@@ -1486,6 +1570,7 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         
         # notify user
         print('> Calculating end of season (eos) times via method: relative_value.')
+        print('> Warning: this can take a long time.')
         
         # get vege end of season times (day of year)
         da_eos_times = slope_r_neg['time.dayofyear'].isel(time=i, drop=True)
@@ -1540,6 +1625,10 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         
         # calc abs distance of negative slope from stl values
         dists_from_stl_values = abs(slope_r_neg - stl_r)
+        
+        # make mask for all nan pixels and fill with 0.0 (needs to be float)
+        mask = dists_from_stl_values.isnull().all('time')
+        dists_from_stl_values = xr.where(mask, 0.0, dists_from_stl_values)
 
         # get time index where min absolute dist from eos
         i = dists_from_stl_values.argmin('time')
@@ -1551,7 +1640,16 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         print('> Calculating end of season (eos) times via method: stl_trend.')
         
         # get vege end of season times (day of year)
-        da_eos_times = slope_r_eos['time.dayofyear'].isel(time=i, drop=True) 
+        da_eos_times = slope_r_eos['time.dayofyear'].isel(time=i, drop=True)
+        
+    else:
+        raise ValueError('Provided method not supported. Aborting.')
+
+    # replace any all nan slices with last val and time in each pixel
+    #da_eos_values = da_eos_values.where(~mask, slope_r.isel(time=-1))
+    #da_eos_times = da_eos_times.where(~mask, slope_r['time.dayofyear'].isel(time=-1))
+    da_eos_values = da_eos_values.where(~mask, np.nan)
+    da_eos_times = da_eos_times.where(~mask, np.nan)
     
     # convert type
     da_eos_values = da_eos_values.astype('float32')
@@ -1949,68 +2047,7 @@ def get_siot(da, da_base_values):
         
     return da_siot_values
     
-    
-def get_nos(da):
-    """
-    Takes an xarray DataArray containing vege values and calculates the number of
-    seasons (nos) for each timeseries pixel. The nos provides a count of number of
-    peaks in each pixel timeseries.
 
-    Parameters
-    ----------
-    da: xarray DataArray
-        A two-dimensional or multi-dimensional array containing an DataArray of veg_index 
-        and time values. 
-
-    Returns
-    -------
-    da_nos_values : xarray DataArray
-        An xarray DataArray type with an x and y dimension (no time). Each pixel is the 
-        number of seasons (nos) value detected across the timeseries at each pixel.
-    """
-    
-    # notify user
-    print('Beginning calculation of number of seasons (nos) values (times not possible).')   
-
-    # set up calc peaks functions
-    def calc_peaks(vec_data):
-    
-        # get height (val at 75% threshold) and dist between peals (4 seasons)
-        height = np.nanquantile(vec_data, q=0.75)
-        distance = math.ceil(len(vec_data) / 4)
-
-        # calc num peaks
-        peaks = find_peaks(vec_data, height=height, distance=distance)
-
-        # can find specific dates with this
-        #for p_dt in v['time'].isel(time=p):
-            #plt.axvline(vec_dates.dt.dayofyear, color='black', linestyle='--')
-
-        if peaks:
-            return len(peaks[0])
-        else:
-            return 0
-        
-    # calculate nos using calc_funcs func
-    print('> Calculating number of seasons (nos) values.')
-    da_nos_values = xr.apply_ufunc(calc_peaks, da,
-                                   input_core_dims=[['time']],
-                                   vectorize=True, 
-                                   dask='parallelized', 
-                                   output_dtypes=[np.int16])
-    
-    # convert type
-    da_nos_values = da_nos_values.astype('int16')
-    
-    # rename
-    da_nos_values = da_nos_values.rename('nos_values')
-    
-    # notify user
-    print('> Success!\n')
-        
-    return da_nos_values
-    
-    
 def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of_slope', factor=0.5, thresh_sides='two_sided', abs_value=0):
     """
     Takes an xarray DataArray containing veg_index values and calculates numerous phenometrics
@@ -2157,9 +2194,6 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
         da_siot_values = get_siot(da=da, da_base_values=da_bse_values)
     elif base_metric == 'vos':
         da_siot_values = get_siot(da=da, da_base_values=da_vos_values)
-
-    # calc number of seasons (nos) values (time not possible)
-    da_nos_values = get_nos(da=da)
         
     # create data array list
     da_list = [
@@ -2179,8 +2213,7 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
         da_lios_values,
         da_sios_values,
         da_liot_values,
-        da_siot_values,
-        da_nos_values
+        da_siot_values
     ]
     
     # combine data arrays into one dataset
