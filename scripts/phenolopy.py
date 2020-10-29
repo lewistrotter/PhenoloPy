@@ -638,15 +638,35 @@ def smooth(ds, method='savitsky', window_length=3, polyorder=1, sigma=1):
         raise TypeError('> Sigma is < 1 or > 9. Must be between 1 - 9.')
         
     # perform smoothing based on user selected method     
-    if method in ['savitsky', 'gaussian', 'double_logistic']:
+    if method in ['savitsky', 'symm_gaussian', 'asymm_gaussian', 'double_logistic']:
         if method == 'savitsky':
-            ds = ds.apply(savgol_filter, window_length=window_length, polyorder=polyorder, axis=0)
+            
+            # create savitsky smoother func
+            def smoother(da, window_length, polyorder):
+                return da.apply(savgol_filter, window_length=window_length, polyorder=polyorder, axis=0)
+            
+            # create kwargs dict
+            kwargs = {'window_length': window_length, 'polyorder': polyorder}
+
         elif method == 'symm_gaussian':
-            ds = ds.apply(gaussian_filter, sigma=sigma)
+            
+            # create gaussian smoother func
+            def smoother(da, sigma):
+                return da.apply(gaussian_filter, sigma=sigma)
+            
+            # create kwargs dict
+            kwargs = {'sigma': sigma}
+
         elif method == 'asymm_gaussian':
             raise ValueError('> Asymmetrical gaussian not yet implemented.')
+            
         elif method == 'double_logistic':
             raise ValueError('> Double logistic not yet implemented.')
+                
+        # create template and map func to dask chunks
+        temp = xr.full_like(ds, fill_value=np.nan)
+        ds = xr.map_blocks(smoother, ds, template=temp, kwargs=kwargs)
+        
     else:
         raise ValueError('Provided method not supported. Please use savtisky.')
         
@@ -848,6 +868,83 @@ def get_pos(da):
     
     return da_pos_values, da_pos_times
 
+
+def get_mos(da, da_peak_values, da_peak_times):
+    """
+    Takes an xarray DataArray containing veg_index values and calculates the vegetation 
+    value and time (day of year) at middle of season (mos) for each timeseries per-pixel. 
+    The middle of season is the mean vege value and time (day of year) in the timeseries
+    at 80% to left and right of the peak of season (pos) per-pixel.
+    
+    Parameters
+    ----------
+    da: xarray DataArray
+        A two-dimensional or multi-dimensional array containing an DataArray of veg_index 
+        and time values.
+    da_peak_values: xarray DataArray
+        An xarray DataArray type with an x and y dimension (no time). Each pixel is the 
+        veg_index value detected at either the peak (pos) or middle (mos) of season.
+    da_peak_times: xarray DataArray
+        An xarray DataArray type with an x and y dimension (no time). Each pixel must be
+        the time (day of year) value calculated at either at peak of season (pos) or middle 
+        of season (mos) prior.
+
+    Returns
+    -------
+    da_pos_values : xarray DataArray
+        An xarray DataArray type with an x and y dimension (no time). Each pixel is the 
+        veg_index value detected at the peak of season (pos).
+    da_pos_times : xarray DataArray
+        An xarray DataArray type with an x and y dimension (no time). Each pixel is the 
+        time (day of year) value detected at the peak of season (pos).
+    """
+    
+    # notify user
+    print('Beginning calculation of middle of season (mos) values and times.')  
+
+    # get left and right slopes values
+    print('> Calculating middle of season (mos) values.')
+    slope_l = da.where(da['time.dayofyear'] <= da_peak_times)
+    slope_r = da.where(da['time.dayofyear'] >= da_peak_times)
+
+    # getupper 80% values in positive slope on left and right
+    slope_l_upper = slope_l.where(slope_l >= da_peak_values * 0.8)
+    slope_r_upper = slope_r.where(slope_r >= da_peak_values * 0.8)
+
+    # get means of slope left and right
+    slope_l_means = slope_l_upper.mean('time')
+    slope_r_means = slope_r_upper.mean('time')
+
+    # combine left and right veg_index means
+    da_mos_values = (slope_l_means + slope_r_means) / 2
+
+    # notify user
+    print('> Calculating middle of season (mos) times.')
+
+    # get start and end date time on either side
+    i_l = slope_l_upper.argmin('time')
+    i_r = slope_r_upper.argmin('time')
+
+    # get day of year for each side
+    doy_l = slope_l['time.dayofyear'].isel(time=i_l, drop=True)
+    doy_r = slope_r['time.dayofyear'].isel(time=i_r, drop=True)
+
+    # combine left and right time (day of year) means
+    da_mos_times = (doy_l + doy_r) / 2
+    
+    # convert type
+    da_mos_values = da_mos_values.astype('float32')
+    da_mos_times = da_mos_times.astype('int16')
+    
+    # rename vars
+    da_mos_values = da_mos_values.rename('mos_values')
+    da_mos_times = da_mos_times.rename('mos_times')
+
+    # notify user
+    print('> Success!\n')
+    
+    return da_mos_values, da_mos_times
+    
 
 def get_vos(da):
     """
@@ -2129,7 +2226,7 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
     da_vos_values, da_vos_times = get_vos(da=da)
        
     # calc middle of season (mos) value and time
-    # todo
+    da_mos_values, da_mos_times = get_mos(da=da, da_peak_values=da_pos_values, da_peak_times=da_pos_times)
     
     # calc base (bse) values (time not possible). takes peak array (pos or mos)
     if peak_metric == 'pos':
@@ -2204,6 +2301,8 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
     da_list = [
         da_pos_values, 
         da_pos_times,
+        da_mos_values, 
+        da_mos_times,
         da_vos_values, 
         da_vos_times,
         da_bse_values,
