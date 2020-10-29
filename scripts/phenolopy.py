@@ -2197,6 +2197,10 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
     # notify user
     print('Initialising calculation of phenometrics.\n')
     
+    # check if dask - not yet supported
+    if dask.is_dask_collection(da):
+        raise TypeError('Dask arrays not yet supported. Please compute first.')
+    
     # check if dataset type
     if type(da) != xr.DataArray:
         raise TypeError('> Not a data array. Please provide a xarray data array.')
@@ -2212,6 +2216,9 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
     # todo: do dask map here
     # create template dataset to hold phenometrics
     #template = create_ds_template(da)
+    
+    # get crs info before work
+    crs = da.geobox.crs
     
     # take a mask of all-nan slices for clean up at end
     da_all_nan_mask = da.isnull().all('time')
