@@ -923,11 +923,7 @@ def get_pos(da):
     # get pos values (max val in each pixel timeseries)
     print('> Calculating peak of season (pos) values.')
     da_pos_values = da.max('time')
-    
-    # make mask for all nan pixels and fill with 0.0 (needs to be float)
-    mask = da_pos_values.isnull().all('time')
-    da_pos_values = xr.where(mask, 0.0, da_pos_values)
-    
+        
     # get pos times (day of year) at max val in each pixel timeseries)
     print('> Calculating peak of season (pos) times.')
     i = da.argmax('time', skipna=True)
@@ -1056,10 +1052,6 @@ def get_vos(da):
     # get vos values (min val in each pixel timeseries)
     print('> Calculating valley of season (vos) values.')
     da_vos_values = da.min('time')
-    
-    # make mask for all nan pixels and fill with 0.0 (needs to be float)
-    mask = da_vos_values.isnull().all('time')
-    da_vos_values = xr.where(mask, 0.0, da_vos_values)
     
     # get vos times (day of year) at min val in each pixel timeseries)
     print('> Calculating valley of season (vos) times.')
