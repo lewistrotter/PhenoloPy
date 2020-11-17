@@ -2306,8 +2306,9 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
     # get crs info before work
     crs = extract_crs(da=da)
     
-    # take a mask of all-nan slices for clean up at end
+    # take a mask of all-nan slices for clean up at end and set all-nan to 0s
     da_all_nan_mask = da.isnull().all('time')
+    da = da.where(~da_all_nan_mask, 0.0)
     
     # notify user
     print('Beginning calculation of phenometrics. This can take awhile - please wait.\n')
