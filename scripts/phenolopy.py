@@ -1,4 +1,4 @@
-## phenolopy
+# phenolopy
 '''
 This script contains functions for calculating per-pixel phenology metrics (phenometrics)
 on a timeseries of vegetation index values (e.g. NDVI) stored in a xarray DataArray. The
@@ -32,11 +32,13 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 import math
+import dask
 from datetime import datetime, timedelta
 from scipy.stats import zscore
 from scipy.signal import savgol_filter, find_peaks
 from scipy.ndimage import gaussian_filter
 from statsmodels.tsa.seasonal import STL as stl
+from datacube.utils.geometry import assign_crs
 
 
 def conform_dea_band_names(ds):
@@ -821,6 +823,78 @@ def create_ds_template(da):
     return temp_ds
 
 
+def extract_crs(da):
+    """
+    Takes an xarray Dataset pulled from opendatacube and extracts crs metadata
+    if exists. Returns None if not found.
+    
+    Parameters
+    ----------
+    da: xarray Dataset
+        A single- or multi-dimensional array containing (or not) crs metadata.
+
+    Returns
+    -------
+    crs: str
+        A crs object.
+    """
+    
+    # notify user
+    print('Beginning extraction of CRS metadata.')
+    try:
+        # notify user
+        print('> Extracting CRS metadata.')
+        
+        # extract crs metadata
+        crs = da.geobox.crs
+        
+        # notify user
+        print('> Success!\n')
+        
+    except:
+        # notify user
+        print('> No CRS metadata found. Returning None.\n')
+        crs = None       
+    
+    return crs
+
+
+def add_crs(ds, crs):
+    """
+    Takes an xarray Dataset pulled from opendatacube and extracts crs metadata
+    if exists. Returns None if not found.
+    
+    Parameters
+    ----------
+    ds: xarray Dataset
+        A single- or multi-dimensional array containing (or not) crs metadata.
+
+    Returns
+    -------
+    ds: xarray Dataset
+        A Dataset with a new crs.
+    """
+    
+    # notify user
+    print('Beginning addition of CRS metadata.')
+    try:
+        # notify user
+        print('> Adding CRS metadata.')
+        
+        # assign crs via odc utils
+        ds = assign_crs(ds, str(crs))
+        
+        # notify user
+        print('> Success!\n')
+        
+    except:
+        # notify user
+        print('> Could not add CRS metadata to data. Aborting.\n')
+        pass
+        
+    return ds
+    
+
 def get_pos(da):
     """
     Takes an xarray DataArray containing veg_index values and calculates the vegetation 
@@ -849,6 +923,10 @@ def get_pos(da):
     # get pos values (max val in each pixel timeseries)
     print('> Calculating peak of season (pos) values.')
     da_pos_values = da.max('time')
+    
+    # make mask for all nan pixels and fill with 0.0 (needs to be float)
+    mask = da_pos_values.isnull().all('time')
+    da_pos_values = xr.where(mask, 0.0, da_pos_values)
     
     # get pos times (day of year) at max val in each pixel timeseries)
     print('> Calculating peak of season (pos) times.')
@@ -920,6 +998,10 @@ def get_mos(da, da_peak_values, da_peak_times):
 
     # notify user
     print('> Calculating middle of season (mos) times.')
+    
+    # make mask for all nan pixels and fill with 0.0 (needs to be float)
+    mask = da_mos_values.isnull().all('time')
+    da_mos_values = xr.where(mask, 0.0, da_mos_values)
 
     # get start and end date time on either side
     i_l = slope_l_upper.argmin('time')
@@ -974,6 +1056,10 @@ def get_vos(da):
     # get vos values (min val in each pixel timeseries)
     print('> Calculating valley of season (vos) values.')
     da_vos_values = da.min('time')
+    
+    # make mask for all nan pixels and fill with 0.0 (needs to be float)
+    mask = da_vos_values.isnull().all('time')
+    da_vos_values = xr.where(mask, 0.0, da_vos_values)
     
     # get vos times (day of year) at min val in each pixel timeseries)
     print('> Calculating valley of season (vos) times.')
@@ -2218,7 +2304,7 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
     #template = create_ds_template(da)
     
     # get crs info before work
-    crs = da.geobox.crs
+    crs = extract_crs(da=da)
     
     # take a mask of all-nan slices for clean up at end
     da_all_nan_mask = da.isnull().all('time')
@@ -2233,7 +2319,7 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
     da_vos_values, da_vos_times = get_vos(da=da)
        
     # calc middle of season (mos) value and time
-    da_mos_values, da_mos_times = get_mos(da=da, da_peak_values=da_pos_values, da_peak_times=da_pos_times)
+    #da_mos_values, da_mos_times = get_mos(da=da, da_peak_values=da_pos_values, da_peak_times=da_pos_times)
     
     # calc base (bse) values (time not possible). takes peak array (pos or mos)
     if peak_metric == 'pos':
@@ -2254,12 +2340,20 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
         da_sos_values, da_sos_times = get_sos(da=da, da_peak_times=da_pos_times, da_base_values=da_bse_values,
                                               da_aos_values=da_aos_values, method=method, factor=factor,
                                               thresh_sides='two_sided', abs_value=abs_value)
+    elif peak_metric == 'pos' and base_metric == 'vos':
+        da_sos_values, da_sos_times = get_sos(da=da, da_peak_times=da_pos_times, da_base_values=da_vos_values,
+                                              da_aos_values=da_aos_values, method=method, factor=factor,
+                                              thresh_sides='two_sided', abs_value=abs_value)
         
     # do work for mos, vos ect for sos
     
     # calc end of season (eos) values and times. takes peak, base metrics and factor
     if peak_metric == 'pos' and base_metric == 'bse':
         da_eos_values, da_eos_times = get_eos(da=da, da_peak_times=da_pos_times, da_base_values=da_bse_values,
+                                              da_aos_values=da_aos_values, method=method, factor=factor,
+                                              thresh_sides='two_sided', abs_value=abs_value)
+    elif peak_metric == 'pos' and base_metric == 'vos':
+        da_eos_values, da_eos_times = get_eos(da=da, da_peak_times=da_pos_times, da_base_values=da_vos_values,
                                               da_aos_values=da_aos_values, method=method, factor=factor,
                                               thresh_sides='two_sided', abs_value=abs_value)
         
@@ -2308,8 +2402,8 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
     da_list = [
         da_pos_values, 
         da_pos_times,
-        da_mos_values, 
-        da_mos_times,
+        #da_mos_values, 
+        #da_mos_times,
         da_vos_values, 
         da_vos_times,
         da_bse_values,
@@ -2332,6 +2426,9 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
     
     # set original all nan pixels back to nan
     ds_phenos = ds_phenos.where(~da_all_nan_mask)
+    
+    # add crs metadata back onto dataset
+    ds_phenos = add_crs(ds=ds_phenos, crs=crs)
     
     # notify user
     print('Phenometrics calculated successfully!')
