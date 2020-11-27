@@ -18,9 +18,10 @@ Code | Name | Description | Method | Value | Time
 POS | Peak of Season | Highest vegetation value and time of season. | Maximum value in a timeseries. | X | X
 MOS | Middle of Season | Mean vegetation value and time of values in top 80% of season. | Mean value and time where the left and right slope edges have increased and decreased to the 80% level of the season, respectively. | X | X
 VOS | Valley of Season | Lowest vegetation value and time of season. | Minimum value in a timeseries. | X | X
-BSE | Base| TBA | TBA | TBA
-SOS | Start of season | TBA | TBA | TBA
-EOS | End of season | TBA | TBA | TBA
+BSE | Base | Mean of the lowest vegetation values in season. | Mean value of the lowest vegetation values to the left and right of Peak of Season. | X | 
+
+SOS | Start of Season | Vegetation value and time at the start of season. | Six methods available: 1) seasonal amplitude; 2) absolute amplitude; 3) Relative amplitude; 4) LOESS STL Trend line; 5) First value of positive slope; and 6) Median value of positive slope. | X | X
+EOS | End of season | Vegetation value and time at the end of season. | Six methods available: 1) seasonal amplitude; 2) absolute amplitude; 3) Relative amplitude; 4) LOESS STL Trend line; 5) First value of negative slope; and 6) Median value of negative slope. | X | X
 LOS | Length of season | TBA | TBA | TBA
 ROI | Rate of increase | TBA | TBA | TBA
 ROD | Rate of decrease | TBA | TBA | TBA
