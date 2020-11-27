@@ -13,10 +13,12 @@ Phenolopy can generate more than a dozen different metrics describing various as
 
 The codes presented on the figure above translate to:
 
-<sub>Code</sub> | <sub>Name</sub> | <sub>Description</sub> | <sub>Method</sub> | <sub>Value</sub> | <sub>Time</sub>
+Code | Name | Description | Method | Value | Time
 --- | --- | --- | --- | --- | ---
-<sub>POS</sub>  |  <sub>Peak of Season</sub>  |  <sub>Highest vegetation value and time of season.</sub>  |  <sub>Maximum value in a timeseries.</sub>  | :heavy_check_mark:  |  :heavy_check_mark:  
-<sub>MOS | Middle of Season | Mean vegetation value and time of values in top 80% of season. | Mean value and time where the left and right slope edges have increased and decreased to the 80% level of the season, respectively. | X | X</sub>
+<sub>POS</sub> | <sub>Peak of Season</sub> | <sub>Highest vegetation value and time of season.</sub> | <sub>Maximum value in a timeseries.</sub> | :heavy_check_mark: |  :heavy_check_mark:
+
+<sub>MOS</sub> | <sub>Middle of Season</sub> | <sub>Mean vegetation value and time of values in top 80% of season.</sub> | <sub>Mean value and time where the left and right slope edges have increased and decreased to the 80% level of the season, respectively.</sub> | :heavy_check_mark:  | :heavy_check_mark:
+  
 <sub>VOS | Valley of Season | Lowest vegetation value and time of season. | Minimum value in a timeseries. | X | X</sub>
 <sub>BSE | Base | Mean of the lowest vegetation values in season. | Mean value of the lowest vegetation values to the left and right of Peak of Season. | X |  </sub>
 <sub>SOS | Start of Season | Vegetation value and time at the start of season. | Six methods available: 1) seasonal amplitude; 2) absolute amplitude; 3) Relative amplitude; 4) LOESS STL Trend line; 5) First value of positive slope; and 6) Median value of positive slope. | X | X </sub>
