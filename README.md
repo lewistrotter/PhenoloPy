@@ -13,10 +13,10 @@ Phenolopy can generate more than a dozen different metrics describing various as
 
 The codes presented on the figure above translate to:
 
-Code | Metric | Description | Method | Values Represent
+Code | Name | Description | Method | Value | Time
 --- | --- | --- | --- | ---
-POS | Peak of season | The peak vegetation value in timeseries. | Maximum value | Vegetation (e.g. NDVI)
-MOS | Middle of season | TBA | TBA | TBA
+POS | Peak of Season | Highest vegetation value and day of year of season. | Maximum value in pixel timeseries. | X | X
+MOS | Middle of Season | Mean vegetation value and day of year of season over 80% of values of season. | Mean value at which the left and right slope edges have increased and decreased to the 80% level of the season, respectively. | X | X
 NOS | Number of seasons | Total number of prominent peaks (seasons) within timeseries. | TBA | TBA
 VOS | Valley of season | TBA | TBA | TBA
 BSE | Base | TBA | TBA | TBA
