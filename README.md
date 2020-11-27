@@ -15,13 +15,10 @@ The codes presented on the figure above translate to:
 
 Code | Name | Description | Method | Value | Time
 --- | --- | --- | --- | --- | ---
-POS | Peak of Season | Highest vegetation value and day of year of season. | Maximum value in pixel timeseries. | X | X
-MOS | Middle of Season | Mean vegetation value and day of year of season over 80% of values of season. | Mean value at which the left and right slope edges have increased and decreased to the 80% level of the season, respectively. | X | X
-
-NOS | Number of Seasons | Total number of prominent peaks (seasons) within timerseries. | Large peaks detected in pixel timeseries using scipy find_peaks. Enforces minimum width of 3 months between peaks.
-
-VOS | Valley of season | TBA | TBA | TBA
-BSE | Base | TBA | TBA | TBA
+POS | Peak of Season | Highest vegetation value and time of season. | Maximum value in a timeseries. | X | X
+MOS | Middle of Season | Mean vegetation value and time of values in top 80% of season. | Mean value and time where the left and right slope edges have increased and decreased to the 80% level of the season, respectively. | X | X
+VOS | Valley of Season | Lowest vegetation value and time of season. | Minimum value in a timeseries. | X | X
+BSE | Base| TBA | TBA | TBA
 SOS | Start of season | TBA | TBA | TBA
 EOS | End of season | TBA | TBA | TBA
 LOS | Length of season | TBA | TBA | TBA
@@ -32,6 +29,8 @@ SIOS | Short integral of season | TBA | TBA | TBA
 LIOS | Long integral of season | TBA | TBA | TBA
 SIOT | Short integral of total | TBA | TBA | TBA
 LIOT | Long integral of total | TBA | TBA | TBA
+NOS | Number of Seasons | Total number of seasons (i.e. prominent graph peaks) in timerseries. | Peaks detected using scipy find_peaks and any peaks are over 3 months apart. | | 
+
 
 ## Key Technologies
 - Python
