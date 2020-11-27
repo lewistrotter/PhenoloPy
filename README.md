@@ -19,17 +19,16 @@ POS | Peak of Season | Highest vegetation value and time of season. | Maximum va
 MOS | Middle of Season | Mean vegetation value and time of values in top 80% of season. | Mean value and time where the left and right slope edges have increased and decreased to the 80% level of the season, respectively. | X | X
 VOS | Valley of Season | Lowest vegetation value and time of season. | Minimum value in a timeseries. | X | X
 BSE | Base | Mean of the lowest vegetation values in season. | Mean value of the lowest vegetation values to the left and right of Peak of Season. | X | 
-
 SOS | Start of Season | Vegetation value and time at the start of season. | Six methods available: 1) seasonal amplitude; 2) absolute amplitude; 3) Relative amplitude; 4) LOESS STL Trend line; 5) First value of positive slope; and 6) Median value of positive slope. | X | X
 EOS | End of season | Vegetation value and time at the end of season. | Six methods available: 1) seasonal amplitude; 2) absolute amplitude; 3) Relative amplitude; 4) LOESS STL Trend line; 5) First value of negative slope; and 6) Median value of negative slope. | X | X
-LOS | Length of season | TBA | TBA | TBA
-ROI | Rate of increase | TBA | TBA | TBA
-ROD | Rate of decrease | TBA | TBA | TBA
-AOS | Amplitude of season | TBA | TBA | TBA
-SIOS | Short integral of season | TBA | TBA | TBA
-LIOS | Long integral of season | TBA | TBA | TBA
-SIOT | Short integral of total | TBA | TBA | TBA
-LIOT | Long integral of total | TBA | TBA | TBA
+LOS | Length of Season | Length of time (number of days) between the start and end of season. | The day of year at SOS minus EOS. |  | 
+ROI | Rate of Increase | The rate of vegetation "green up" at the beginning of season. | Calculated as the ratio of the difference between the left 20% and 80% levels and the corresponding time difference. |  |  
+ROD | Rate of Decrease | The rate of vegetation "green down" at the end of season. | Calculated as the ratio of the difference between the right 20% and 80% levels and the corresponding time difference. |  |  
+AOS | Amplitude of Season | The amplitude of vegetation values for season. | The difference between the maximum value and the VOS/BSE value. |  | 
+SIOS | Short Integral of Season | Represents the seasonally active vegetation and provides a larger value for herbaceous vegetation cover and smaller value for evergreen vegetation cover. | Calculated using the trapezoidal rule on the total vegetation values between season start and end minus the VOS/BSE level value. | X | 
+LIOS | Long Integral of Season | Represents the total productivity of vegetation when in season. | Calculated using the trapezoidal rule between the total vegetation values between season start and end. | X | 
+SIOT | Short Integral of Total | Represents total vegetation productivity throughout the season, and provides a larger value for herbaceous vegetation cover and smaller value for evergreen vegetation cover. | Calculated using the trapezoidal rule on the total vegetation values minus the VOS/BSE level value. | X | 
+LIOT | Long Integral of Total | Represents the total productivity of vegetation throughout the season. | Calculated using the trapezoidal rule between the total vegetation values between season start and end. | X |
 NOS | Number of Seasons | Total number of seasons (i.e. prominent graph peaks) in timerseries. | Peaks detected using scipy find_peaks and any peaks are over 3 months apart. | | 
 
 
