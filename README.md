@@ -15,7 +15,7 @@ The codes presented on the figure above translate to:
 
 <sub>Code</sub> | <sub>Name</sub> | <sub>Description</sub> | <sub>Method</sub> | <sub>Value</sub> | <sub>Time</sub>
 --- | --- | --- | --- | --- | ---
-<sub>POS</sub>  |  <sub>Peak of Season</sub>  |  <sub>Highest vegetation value and time of season.</sub>  |  <sub>Maximum value in a timeseries.</sub>  |  [x]  |  [x]  
+<sub>POS</sub>  |  <sub>Peak of Season</sub>  |  <sub>Highest vegetation value and time of season.</sub>  |  <sub>Maximum value in a timeseries.</sub>  | :heavy_check_mark:  |  :heavy_check_mark:  
 <sub>MOS | Middle of Season | Mean vegetation value and time of values in top 80% of season. | Mean value and time where the left and right slope edges have increased and decreased to the 80% level of the season, respectively. | X | X</sub>
 <sub>VOS | Valley of Season | Lowest vegetation value and time of season. | Minimum value in a timeseries. | X | X</sub>
 <sub>BSE | Base | Mean of the lowest vegetation values in season. | Mean value of the lowest vegetation values to the left and right of Peak of Season. | X |  </sub>
