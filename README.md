@@ -16,7 +16,6 @@ The codes presented on the figure above translate to:
 Code | Name | Description | Method | Value | Time
 --- | --- | --- | --- | --- | ---
 POS | Peak of Season | Highest vegetation value and day of year of season. | Maximum value in pixel timeseries. | X | X
-
 MOS | Middle of Season | Mean vegetation value and day of year of season over 80% of values of season. | Mean value at which the left and right slope edges have increased and decreased to the 80% level of the season, respectively. | X | X
 
 NOS | Number of Seasons | Total number of prominent peaks (seasons) within timerseries. | Large peaks detected in pixel timeseries using scipy find_peaks. Enforces minimum width of 3 months between peaks.
