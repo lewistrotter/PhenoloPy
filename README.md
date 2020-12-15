@@ -13,23 +13,23 @@ Phenolopy can generate more than a dozen different metrics describing various as
 
 The codes presented on the figure above translate to:
 
-Code | Metric | Description | Method | Values Represent
---- | --- | --- | --- | ---
-POS | Peak of season | The peak vegetation value in timeseries. | Maximum value | Vegetation (e.g. NDVI)
-MOS | Middle of season | TBA | TBA | TBA
-NOS | Number of seasons | Total number of prominent peaks (seasons) within timeseries. | TBA | TBA
-VOS | Valley of season | TBA | TBA | TBA
-BSE | Base | TBA | TBA | TBA
-SOS | Start of season | TBA | TBA | TBA
-EOS | End of season | TBA | TBA | TBA
-LOS | Length of season | TBA | TBA | TBA
-ROI | Rate of increase | TBA | TBA | TBA
-ROD | Rate of decrease | TBA | TBA | TBA
-AOS | Amplitude of season | TBA | TBA | TBA
-SIOS | Short integral of season | TBA | TBA | TBA
-LIOS | Long integral of season | TBA | TBA | TBA
-SIOT | Short integral of total | TBA | TBA | TBA
-LIOT | Long integral of total | TBA | TBA | TBA
+Code | Name | Description | Method | Value | Time
+--- | --- | --- | --- | --- | ---
+POS | Peak of Season | Highest vegetation value and time of season. | Maximum value in a timeseries. | :heavy_check_mark: | :heavy_check_mark: 
+MOS | Middle of Season | Mean vegetation value and time of values in top 80% of season. | Mean value and time where the left and right slope edges have increased and decreased to the 80% level of the season, respectively. | :heavy_check_mark: | :heavy_check_mark:
+VOS | Valley of Season | Lowest vegetation value and time of season. | Minimum value in a timeseries. | :heavy_check_mark: | :heavy_check_mark: 
+BSE | Base | Mean of the lowest vegetation values in season. | Mean value of the lowest vegetation values to the left and right of Peak of Season. | :heavy_check_mark: | 
+SOS | Start of Season | Vegetation value and time at the start of season. | Six methods available: 1) seasonal amplitude; 2) absolute amplitude; 3) Relative amplitude; 4) LOESS STL Trend line; 5) First value of positive slope; and 6) Median value of positive slope. | :heavy_check_mark: | :heavy_check_mark: 
+EOS | End of season | Vegetation value and time at the end of season. | Six methods available: 1) seasonal amplitude; 2) absolute amplitude; 3) Relative amplitude; 4) LOESS STL Trend line; 5) First value of negative slope; and 6) Median value of negative slope. | :heavy_check_mark: | :heavy_check_mark: 
+LOS | Length of Season | Length of time (number of days) between the start and end of season. | The day of year at SOS minus EOS. | | 
+ROI | Rate of Increase | The rate of vegetation "green up" at the beginning of season. | Calculated as the ratio of the difference between the left 20% and 80% levels and the corresponding time difference. | | 
+ROD | Rate of Decrease | The rate of vegetation "green down" at the end of season. | Calculated as the ratio of the difference between the right 20% and 80% levels and the corresponding time difference. | | 
+AOS | Amplitude of Season | The amplitude of vegetation values for season. | The difference between the maximum value and the VOS/BSE value. | | 
+SIOS | Short Integral of Season | Represents the seasonally active vegetation and provides a larger value for herbaceous vegetation cover and smaller value for evergreen vegetation cover. | Calculated using the trapezoidal rule on the total vegetation values between season start and end minus the VOS/BSE level value. | :heavy_check_mark: | 
+LIOS | Long Integral of Season | Represents the total productivity of vegetation when in season. | Calculated using the trapezoidal rule between the total vegetation values between season start and end. | :heavy_check_mark: | 
+SIOT | Short Integral of Total | Represents total vegetation productivity throughout the season, and provides a larger value for herbaceous vegetation cover and smaller value for evergreen vegetation cover. | Calculated using the trapezoidal rule on the total vegetation values minus the VOS/BSE level value. | :heavy_check_mark: | 
+LIOT | Long Integral of Total | Represents the total productivity of vegetation throughout the season. | Calculated using the trapezoidal rule between the total vegetation values between season start and end. | :heavy_check_mark: | 
+NOS | Number of Seasons | Total number of seasons (i.e. prominent graph peaks) in timerseries. | Peaks detected using scipy find_peaks and any peaks are over 3 months apart. | | 
 
 ## Key Technologies
 - Python
