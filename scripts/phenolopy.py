@@ -864,13 +864,13 @@ def extract_crs(da):
 
 def add_crs(ds, crs):
     """
-    Takes an xarray Dataset pulled from opendatacube and extracts crs metadata
-    if exists. Returns None if not found.
+    Takes an xarray Dataset adds previously extracted crs metadata, if exists. 
+    Returns None if not found.
     
     Parameters
     ----------
     ds: xarray Dataset
-        A single- or multi-dimensional array containing (or not) crs metadata.
+        A single- or multi-dimensional array with/without crs metadata.
 
     Returns
     -------
