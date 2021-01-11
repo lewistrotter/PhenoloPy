@@ -946,7 +946,7 @@ def get_pos(da):
     return da_pos_values, da_pos_times
 
 
-def get_mos(da, da_peak_values, da_peak_times):
+def get_mos(da, da_peak_times):
     """
     Takes an xarray DataArray containing veg_index values and calculates the vegetation 
     value and time (day of year) at middle of season (mos) for each timeseries per-pixel. 
@@ -996,35 +996,36 @@ def get_mos(da, da_peak_values, da_peak_times):
     da_mos_values = (slope_l_means + slope_r_means) / 2
 
     # notify user
-    print('> Calculating middle of season (mos) times.')
+    #print('> Calculating middle of season (mos) times.')
     
     # make mask for all nan pixels and fill with 0.0 (needs to be float)
-    mask = da_mos_values.isnull().all('time')
-    da_mos_values = xr.where(mask, 0.0, da_mos_values)
+    #mask = da_mos_values.isnull().all('time')
+    #da_mos_values = xr.where(mask, 0.0, da_mos_values)
 
     # get start and end date time on either side
-    i_l = slope_l_upper.argmin('time')
-    i_r = slope_r_upper.argmin('time')
+    #i_l = slope_l_upper.argmin('time')
+    #i_r = slope_r_upper.argmin('time')
 
     # get day of year for each side
-    doy_l = slope_l['time.dayofyear'].isel(time=i_l, drop=True)
-    doy_r = slope_r['time.dayofyear'].isel(time=i_r, drop=True)
+    #doy_l = slope_l['time.dayofyear'].isel(time=i_l, drop=True)
+    #doy_r = slope_r['time.dayofyear'].isel(time=i_r, drop=True)
 
     # combine left and right time (day of year) means
-    da_mos_times = (doy_l + doy_r) / 2
+    #da_mos_times = (doy_l + doy_r) / 2
     
     # convert type
     da_mos_values = da_mos_values.astype('float32')
-    da_mos_times = da_mos_times.astype('int16')
+    #da_mos_times = da_mos_times.astype('int16')
     
     # rename vars
     da_mos_values = da_mos_values.rename('mos_values')
-    da_mos_times = da_mos_times.rename('mos_times')
+    #da_mos_times = da_mos_times.rename('mos_times')
 
     # notify user
     print('> Success!\n')
     
-    return da_mos_values, da_mos_times
+    #return da_mos_values, da_mos_times
+    return da_mos_values
     
 
 def get_vos(da):
@@ -2315,7 +2316,7 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
     da_vos_values, da_vos_times = get_vos(da=da)
        
     # calc middle of season (mos) value and time
-    #da_mos_values, da_mos_times = get_mos(da=da, da_peak_values=da_pos_values, da_peak_times=da_pos_times)
+    da_mos_values, da_mos_times = get_mos(da=da, da_peak_values=da_pos_values, da_peak_times=da_pos_times)
     
     # calc base (bse) values (time not possible). takes peak array (pos or mos)
     if peak_metric == 'pos':
