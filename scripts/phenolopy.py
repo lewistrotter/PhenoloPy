@@ -949,7 +949,7 @@ def get_pos(da):
 def get_mos(da, da_peak_times):
     """
     Takes an xarray DataArray containing veg_index values and calculates the vegetation 
-    value and time (day of year) at middle of season (mos) for each timeseries per-pixel. 
+    values (time not available) at middle of season (mos) for each timeseries per-pixel. 
     The middle of season is the mean vege value and time (day of year) in the timeseries
     at 80% to left and right of the peak of season (pos) per-pixel.
     
@@ -958,35 +958,28 @@ def get_mos(da, da_peak_times):
     da: xarray DataArray
         A two-dimensional or multi-dimensional array containing an DataArray of veg_index 
         and time values.
-    da_peak_values: xarray DataArray
-        An xarray DataArray type with an x and y dimension (no time). Each pixel is the 
-        veg_index value detected at either the peak (pos) or middle (mos) of season.
     da_peak_times: xarray DataArray
         An xarray DataArray type with an x and y dimension (no time). Each pixel must be
-        the time (day of year) value calculated at either at peak of season (pos) or middle 
-        of season (mos) prior.
+        the time (day of year) value calculated at peak of season (pos) prior.
 
     Returns
     -------
-    da_pos_values : xarray DataArray
+    da_mos_values : xarray DataArray
         An xarray DataArray type with an x and y dimension (no time). Each pixel is the 
         veg_index value detected at the peak of season (pos).
-    da_pos_times : xarray DataArray
-        An xarray DataArray type with an x and y dimension (no time). Each pixel is the 
-        time (day of year) value detected at the peak of season (pos).
     """
     
     # notify user
-    print('Beginning calculation of middle of season (mos) values and times.')  
+    print('Beginning calculation of middle of season (mos) values (times not possible).')  
 
     # get left and right slopes values
     print('> Calculating middle of season (mos) values.')
     slope_l = da.where(da['time.dayofyear'] <= da_peak_times)
     slope_r = da.where(da['time.dayofyear'] >= da_peak_times)
-
+        
     # getupper 80% values in positive slope on left and right
-    slope_l_upper = slope_l.where(slope_l >= da_peak_values * 0.8)
-    slope_r_upper = slope_r.where(slope_r >= da_peak_values * 0.8)
+    slope_l_upper = slope_l.where(slope_l >= slope_l.max('time') * 0.8)
+    slope_r_upper = slope_r.where(slope_r >= slope_r.max('time') * 0.8)
 
     # get means of slope left and right
     slope_l_means = slope_l_upper.mean('time')
@@ -994,37 +987,17 @@ def get_mos(da, da_peak_times):
 
     # combine left and right veg_index means
     da_mos_values = (slope_l_means + slope_r_means) / 2
-
-    # notify user
-    #print('> Calculating middle of season (mos) times.')
-    
-    # make mask for all nan pixels and fill with 0.0 (needs to be float)
-    #mask = da_mos_values.isnull().all('time')
-    #da_mos_values = xr.where(mask, 0.0, da_mos_values)
-
-    # get start and end date time on either side
-    #i_l = slope_l_upper.argmin('time')
-    #i_r = slope_r_upper.argmin('time')
-
-    # get day of year for each side
-    #doy_l = slope_l['time.dayofyear'].isel(time=i_l, drop=True)
-    #doy_r = slope_r['time.dayofyear'].isel(time=i_r, drop=True)
-
-    # combine left and right time (day of year) means
-    #da_mos_times = (doy_l + doy_r) / 2
     
     # convert type
     da_mos_values = da_mos_values.astype('float32')
-    #da_mos_times = da_mos_times.astype('int16')
     
     # rename vars
     da_mos_values = da_mos_values.rename('mos_values')
-    #da_mos_times = da_mos_times.rename('mos_times')
 
     # notify user
     print('> Success!\n')
     
-    #return da_mos_values, da_mos_times
+    #return da_mos_values
     return da_mos_values
     
 
@@ -2315,63 +2288,53 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
     # calc valley of season (vos) values and times
     da_vos_values, da_vos_times = get_vos(da=da)
        
-    # calc middle of season (mos) value and time
-    da_mos_values, da_mos_times = get_mos(da=da, da_peak_values=da_pos_values, da_peak_times=da_pos_times)
+    # calc middle of season (mos) value (time not possible)
+    da_mos_values = get_mos(da=da, da_peak_times=da_pos_times)
     
-    # calc base (bse) values (time not possible). takes peak array (pos or mos)
-    if peak_metric == 'pos':
-        da_bse_values = get_bse(da=da, da_peak_times=da_pos_times)
-    elif peak_metric == 'mos':
-        raise ValueError('> The peak_metric does not support mos yet; use pos for now.')
+    # calc base (bse) values (time not possible).
+    da_bse_values = get_bse(da=da, da_peak_times=da_pos_times)
 
     # calc amplitude of season (aos) values (time not possible). takes peak and base arrays
     if peak_metric == 'pos' and base_metric == 'bse':
         da_aos_values = get_aos(da_peak_values=da_pos_values, da_base_values=da_bse_values)
     elif peak_metric == 'pos' and base_metric == 'vos':
         da_aos_values = get_aos(da_peak_values=da_pos_values, da_base_values=da_vos_values)
-    elif peak_metric == 'mos':
-        raise ValueError('> The peak_metric does not support mos yet; use pos for now.')
-        
+    elif peak_metric == 'mos' and base_metric == 'bse':
+        da_aos_values = get_aos(da_peak_values=da_mos_values, da_base_values=da_bse_values)
+    elif peak_metric == 'mos' and base_metric == 'vos':
+        da_aos_values = get_aos(da_peak_values=da_mos_values, da_base_values=da_vos_values)
+
     # calc start of season (sos) values and times. takes peak, base metrics and factor
-    if peak_metric == 'pos' and base_metric == 'bse':
+    if base_metric == 'bse':
         da_sos_values, da_sos_times = get_sos(da=da, da_peak_times=da_pos_times, da_base_values=da_bse_values,
                                               da_aos_values=da_aos_values, method=method, factor=factor,
                                               thresh_sides='two_sided', abs_value=abs_value)
-    elif peak_metric == 'pos' and base_metric == 'vos':
+    elif base_metric == 'vos':
         da_sos_values, da_sos_times = get_sos(da=da, da_peak_times=da_pos_times, da_base_values=da_vos_values,
                                               da_aos_values=da_aos_values, method=method, factor=factor,
-                                              thresh_sides='two_sided', abs_value=abs_value)
-        
-    # do work for mos, vos ect for sos
+                                              thresh_sides='two_sided', abs_value=abs_value)   
     
     # calc end of season (eos) values and times. takes peak, base metrics and factor
-    if peak_metric == 'pos' and base_metric == 'bse':
+    if base_metric == 'bse':
         da_eos_values, da_eos_times = get_eos(da=da, da_peak_times=da_pos_times, da_base_values=da_bse_values,
                                               da_aos_values=da_aos_values, method=method, factor=factor,
                                               thresh_sides='two_sided', abs_value=abs_value)
-    elif peak_metric == 'pos' and base_metric == 'vos':
+    elif base_metric == 'vos':
         da_eos_values, da_eos_times = get_eos(da=da, da_peak_times=da_pos_times, da_base_values=da_vos_values,
                                               da_aos_values=da_aos_values, method=method, factor=factor,
                                               thresh_sides='two_sided', abs_value=abs_value)
         
-    # do work for mos, vos ect for eos
     
     # calc length of season (los) values (time not possible). takes sos and eos
     da_los_values = get_los(da=da, da_sos_times=da_sos_times, da_eos_times=da_eos_times)
     
-    # calc rate of icnrease (roi) values (time not possible). takes peak array (pos or mos)
-    if peak_metric == 'pos':
-        da_roi_values = get_roi(da_peak_values=da_pos_values, da_peak_times=da_pos_times,
-                                da_sos_values=da_sos_values, da_sos_times=da_sos_times)
-    elif peak_metric == 'mos':
-        raise ValueError('> The peak_metric does not support mos yet; use pos for now.')
+    # calc rate of icnrease (roi) values (time not possible). takes peak array (pos)
+    da_roi_values = get_roi(da_peak_values=da_pos_values, da_peak_times=da_pos_times,
+                            da_sos_values=da_sos_values, da_sos_times=da_sos_times)
         
-    # calc rate of decrease (rod) values (time not possible). takes peak array (pos or mos)
-    if peak_metric == 'pos':
-        da_rod_values = get_rod(da_peak_values=da_pos_values, da_peak_times=da_pos_times,
-                                da_eos_values=da_eos_values, da_eos_times=da_eos_times)
-    elif peak_metric == 'mos':
-        raise ValueError('> The peak_metric does not support mos yet; use pos for now.')
+    # calc rate of decrease (rod) values (time not possible). takes peak array (pos)
+    da_rod_values = get_rod(da_peak_values=da_pos_values, da_peak_times=da_pos_times,
+                            da_eos_values=da_eos_values, da_eos_times=da_eos_times)
     
     # calc long integral of season (lios) values (time not possible)
     da_lios_values = get_lios(da=da, da_sos_times=da_sos_times, da_eos_times=da_eos_times)
@@ -2399,8 +2362,7 @@ def calc_phenometrics(da, peak_metric='pos', base_metric='bse', method='first_of
     da_list = [
         da_pos_values, 
         da_pos_times,
-        #da_mos_values, 
-        #da_mos_times,
+        da_mos_values, 
         da_vos_values, 
         da_vos_times,
         da_bse_values,
