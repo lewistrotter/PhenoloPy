@@ -978,8 +978,8 @@ def get_mos(da, da_peak_times):
     slope_r = da.where(da['time.dayofyear'] >= da_peak_times)
         
     # getupper 80% values in positive slope on left and right
-    slope_l_upper = slope_l.where(slope_l >= slope_l.max('time') * 0.8)
-    slope_r_upper = slope_r.where(slope_r >= slope_r.max('time') * 0.8)
+    slope_l_upper = slope_l.where(slope_l >= (slope_l.max('time') * 0.8))
+    slope_r_upper = slope_r.where(slope_r >= (slope_r.max('time') * 0.8))
 
     # get means of slope left and right
     slope_l_means = slope_l_upper.mean('time')
