@@ -1,4 +1,4 @@
-# phenolopy
+# phenolop
 '''
 This script contains functions for calculating per-pixel phenology metrics (phenometrics)
 on a timeseries of vegetation index values (e.g. NDVI) stored in a xarray DataArray. The
