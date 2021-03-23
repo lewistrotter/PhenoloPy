@@ -1,4 +1,4 @@
-# phenolop
+# phenolopy
 '''
 This script contains functions for calculating per-pixel phenology metrics (phenometrics)
 on a timeseries of vegetation index values (e.g. NDVI) stored in a xarray DataArray. The
@@ -1173,7 +1173,7 @@ def get_sos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         3. seasonal_amplitude: uses a percentage of the amplitude from base to find sos.
         4. absolute_value: users defined absolute value in vege index units is used to find sos.
         5. relative_amplitude: robust mean peak and base, and a factor of that area, used to find sos.
-        6. stl_trendline: robust but slow - uses seasonal decomp LOESS method to find trend line and sos.
+        6. stl_trend: robust but slow - uses seasonal decomp LOESS method to find trend line and sos.
     factor: float
         A float value between 0 and 1 which is used to increase or decrease the amplitude
         threshold for the seasonal_amplitude method. A factor closer to 0 results in start 
@@ -1510,7 +1510,7 @@ def get_eos(da, da_peak_times, da_base_values, da_aos_values, method, factor, th
         3. seasonal_amplitude: uses a percentage of the amplitude from base to find eos.
         4. absolute_value: users defined absolute value in vege index units is used to find eos.
         5. relative_amplitude: robust mean peak and base, and a factor of that area, used to find eos.
-        6. stl_trendline: robust but slow - uses seasonal decomp LOESS method to find trend line and eos.
+        6. stl_trend: robust but slow - uses seasonal decomp LOESS method to find trend line and eos.
     factor: float
         A float value between 0 and 1 which is used to increase or decrease the amplitude
         threshold for the seasonal_amplitude method. A factor closer to 0 results in end 
