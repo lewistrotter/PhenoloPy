@@ -318,7 +318,7 @@ def remove_outliers(ds, method='median', user_factor=2, z_pval=0.05):
     return ds
 
 
-def resample(ds, interval='1M', reducer='median'):
+def resample(ds, interval='1M', reducer='median', correct_end_date=True):
     """
     Takes an xarray dataset containing vegetation index variable and resamples
     to a new temporal resolution. The available time intervals are 1W (weekly),
@@ -336,6 +336,12 @@ def resample(ds, interval='1M', reducer='median'):
     reducer: str
         The reducer function to apply when downsampling. Can choose median or
         mean as the reducer.
+    correct_end_date : bool
+        Resampling can lose dates in the December month of the last year in a
+        dataset as no values exist in the following year to interpolate to. The
+        correction of the end date will modify the last date in the dataset to
+        be the 31st (if the month is December) to trick the interpolator into
+        interpolating to the end of the month. Optional, default is True.
 
     Returns
     -------
@@ -363,6 +369,34 @@ def resample(ds, interval='1M', reducer='median'):
     if len(ds['veg_index'].shape) == 1:
         raise Exception('Resample does not operate on 1D datasets. Ensure it has an x, y and time dimension.')
         
+    # get last datetime object
+    old_dt = ds['time'][-1]
+    
+    # correct end datetime day if user requested it
+    if correct_end_date:
+        if interval != '1M':
+            
+            # correct last date to be newday in december
+            d, m, y = int(old_dt['time.day']), int(old_dt['time.month']), int(old_dt['time.year'])
+            if m == 12 and d < 31:
+                # notify
+                print('> Changing day of last datetime value in dataset to the 31st.')
+
+                # convert to 31st
+                new_dt = '{0}-{1}-{2}'.format(y, m, 31)
+                new_dt = np.datetime64(new_dt, dtype='datetime64[ns]')
+
+                # update value in dataset
+                ds['time'] = ds['time'].where(ds['time'] != old_dt, new_dt)     
+                
+            else:
+                # notify
+                print('> Could not change day value as month is not December or day already the 31st.')
+                
+        else:
+            # notify
+            print('> Can only change last date if interval is not 1M. Skipping.')
+                    
     # resample based on user selected interval and reducer
     if interval in ['1W', '2W', '1M']:
         if reducer == 'mean':
@@ -374,6 +408,20 @@ def resample(ds, interval='1M', reducer='median'):
     else:
         raise ValueError('Provided resample interval not supported. Please use 1W, 2W or 1M.')
         
+    # drop last date if resample moved into next year
+    if correct_end_date:
+        
+        # if last date does not equal original year, drop any potential broken years
+        if ds['time.year'][-1] != old_dt['time.year']:
+            
+            # notify
+            print('> Dates outside of the requested years were interpolated. Dropping.')
+            ds = ds.where(ds['time.year'] == 2019, drop=True)
+            
+        else:
+            # notify
+            print('> Date correction did not result in unwanted datetimes - great.')
+            
     # check if any nans exist in dataset after resample and tell user
     if bool(ds.isnull().any()):
         print('> Warning: dataset contains nan values. You should interpolate nan values next.')
