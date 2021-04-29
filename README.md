@@ -16,7 +16,7 @@ The codes presented on the figure above translate to:
 Code | Name | Description | Method | Value | Time
 --- | --- | --- | --- | --- | ---
 POS | Peak of Season | Highest vegetation value and time of season. | Maximum value in a timeseries. | :heavy_check_mark: | :heavy_check_mark: 
-MOS | Middle of Season | Mean vegetation value and time of values in top 80% of season. | Mean value and time where the left and right slope edges have increased and decreased to the 80% level of the season, respectively. | :heavy_check_mark: | :heavy_check_mark:
+MOS | Middle of Season | Mean vegetation value and time of values in top 80% of season. | Mean value and time where the left and right slope edges have increased and decreased to the 80% level of the season, respectively. | :heavy_check_mark: |
 VOS | Valley of Season | Lowest vegetation value and time of season. | Minimum value in a timeseries. | :heavy_check_mark: | :heavy_check_mark: 
 BSE | Base | Mean of the lowest vegetation values in season. | Mean value of the lowest vegetation values to the left and right of Peak of Season. | :heavy_check_mark: | 
 SOS | Start of Season | Vegetation value and time at the start of season. | Six methods available: 1) seasonal amplitude; 2) absolute amplitude; 3) Relative amplitude; 4) LOESS STL Trend line; 5) First value of positive slope; and 6) Median value of positive slope. | :heavy_check_mark: | :heavy_check_mark: 
