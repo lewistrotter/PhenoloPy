@@ -31,14 +31,28 @@ SIOT | Short Integral of Total | Represents total vegetation productivity throug
 LIOT | Long Integral of Total | Represents the total productivity of vegetation throughout the season. | Calculated using the trapezoidal rule between the total vegetation values between season start and end. | :heavy_check_mark: | 
 NOS | Number of Seasons | Total number of seasons (i.e. prominent graph peaks) in timerseries. | Peaks detected using scipy find_peaks and any peaks are over 3 months apart. | | 
 
+## Requirements
+1. A Digital Earth Australia (DEA) Open Data Cube (ODC) Sandbox account is required to run the tool. Sign up at https://app.sandbox.dea.ga.gov.au/.
+2. Basic Python and Jupyter Notebook experience.
+3. Chrome or Edge web-browser.
+
 ## Key Technologies
 - Python
 - Xarray and Numpy
 - OpenDataCube (ODC)
 - Scipy and Statsmodel
 
-## Demonstration
-Todo.
+## Setup information
+A few steps are required to use Phenolopy.
+1. Sign up for a DEA ODC Sandbox account here: https://app.sandbox.dea.ga.gov.au/.
+2. Once logged in, open a new terminal window and execute the following: git clone https://github.com/frontiersi/Phenolopy
+3. This will pull the latest version of the code from github and install it automatically into your Sandbox environment under the folder Phenolopy.
+4. Open the Phenolopy folder and run the Phenolopy.ipynb file. This will run a Jupyter Notebook that provides a basic demonstration of the tool's functions.
+5. Run through the Jupyter Notebook from top to bottom.
 
-## Sources
-Todo.
+## Dependencies
+- Scipy
+- Statsmodel
+
+## Licences
+Apache Licence Version 2.0
