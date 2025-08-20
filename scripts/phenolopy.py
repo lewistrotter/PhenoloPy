@@ -306,7 +306,7 @@ def remove_outliers(ds, method='median', user_factor=2, z_pval=0.05):
         raise ValueError('Provided method not supported. Please use median or zscore.')
         
     # check if any nans exist in dataset after resample and tell user
-    if bool(ds.isnull().any()):
+    if bool(ds.isnull().any().to_array().any()):
         print('> Warning: dataset contains nan values. You may want to interpolate next.')
 
     # notify user
